@@ -123,7 +123,7 @@ case class LlapRelation(
   private def getQueryString(requiredColumns: Array[String], filters: Array[Filter]): String = {
     var selectCols = "*"
     if (requiredColumns.length > 0) {
-      selectCols = requiredColumns.mkString(",")
+      selectCols = requiredColumns.map(x => s"`$x`").mkString(",")
     }
 
     val baseQuery = getQueryType match {
