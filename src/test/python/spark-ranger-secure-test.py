@@ -8,10 +8,9 @@ import filecmp
 import tempfile
 
 testdb = "spark_ranger_test"
-hiveJdbcUrl = 'jdbc:hive2://ctr-e133-1493418528701-135187-01-000005.hwx.site:10500/default;principal=hive/ctr-e133-1493418528701-135187-01-000005.hwx.site@EXAMPLE.COM'
+hiveJdbcUrl = 'jdbc:hive2://ctr-e133-1493418528701-160107-01-000009.hwx.site:10500/default;principal=hive/_HOST@EXAMPLE.COM'
 generateGoldenFiles = False
 answerPath = "../resources/answer"
-data_Path_1 = "../resources/ranger_table_int.data"
 dirPath = tempfile.mkdtemp()
 dbs = [
     'db_full',
@@ -108,7 +107,7 @@ class SparkRangerTestSuite(unittest.TestCase):
 
 
 class DbTestSuite(SparkRangerTestSuite):
-    sparkJdbcUrl = 'jdbc:hive2://ctr-e133-1493418528701-135187-01-000004.hwx.site:10015/default;principal=hive/ctr-e133-1493418528701-135187-01-000004.hwx.site@EXAMPLE.COM;hive.server2.proxy.user='
+    sparkJdbcUrl = 'jdbc:hive2://ctr-e133-1493418528701-160107-01-000007.hwx.site:10015/default;principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
 
     def setUp(self):
         sqls = map(lambda db: 'DROP DATABASE IF EXISTS ' + db + ' CASCADE', dbs + [testdb])
@@ -141,7 +140,8 @@ class DbTestSuite(SparkRangerTestSuite):
 
 
 class TableTestSuite(SparkRangerTestSuite):
-    sparkJdbcUrl = 'jdbc:hive2://ctr-e126-1485243696039-11019-01-000004.hwx.site:10016/' + testdb + ';principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
+
+    sparkJdbcUrl = 'jdbc:hive2://ctr-e133-1493418528701-160107-01-000007.hwx.site:10015/' + testdb + ';principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
 
     def setUp(self):
         sqls = [
@@ -158,16 +158,16 @@ class TableTestSuite(SparkRangerTestSuite):
             'CREATE TABLE {0}.t_index (a int, b int)',
             'CREATE TABLE {0}.t_lock (a int, b int)',
             'CREATE TABLE {0}.t_mask_and_filter (name STRING, gender STRING)',
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_partial'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_select'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_create'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_drop'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_alter'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_index'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_lock'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_no'
-            'LOAD DATA LOCAL INPATH data_Path_1 INTO TALBE {0}.t_full'
-               
+            'INSERT INTO {0}.t_full VALUES(1, 2)',
+            'INSERT INTO {0}.t_no VALUES(1, 2)',
+            'INSERT INTO {0}.t_partial VALUES(1, 2)',
+            'INSERT INTO {0}.t_select VALUES(1, 2)',
+            'INSERT INTO {0}.t_update VALUES(1, 2)',
+            'INSERT INTO {0}.t_create VALUES(1, 2)',
+            'INSERT INTO {0}.t_drop VALUES(1, 2)',
+            'INSERT INTO {0}.t_alter VALUES(1, 2)',
+            'INSERT INTO {0}.t_index VALUES(1, 2)',
+            'INSERT INTO {0}.t_lock VALUES(1, 2)', 
             'INSERT INTO {0}.t_mask_and_filter VALUES("Barack Obama", "M")',
             'INSERT INTO {0}.t_mask_and_filter VALUES("Michelle Obama", "F")',
             'INSERT INTO {0}.t_mask_and_filter VALUES("Hilary Clinton", "F")',
@@ -178,28 +178,28 @@ class TableTestSuite(SparkRangerTestSuite):
         os.system(cmd.format(hiveJdbcUrl, statements))
 
     def test_00_show(self):
-        self.execute('SHOW TABLES', 'show_1', 'hive')
-        self.execute('SHOW TABLES', 'show_2')
-        self.execute('SHOW TABLES \'t_full\'', 'show_3')
+        self.execute('SHOW TABLES in '+ testdb, 'show_1', 'hive')
+        self.execute('SHOW TABLES in '+ testdb, 'show_2')
+        # self.execute('SHOW TABLES in \'t_full\'', 'show_3')
 
     def test_10_desc(self):
         for t in tables:
-            self.execute('DESC ' + t, 'desc_' + t)
+            self.execute('DESC ' + testdb+ '.'+ t, 'desc_' + t)
 
-    def test_20_create(self):
-        for t in tables:
-            self.execute('CREATE TABLE ' + t + '_create(a INT)', 'create_1_' + t)
-            self.execute('SHOW TABLES \'' + t + '_create\'', 'create_2_' + t, 'hive')
+    #def test_20_create(self):
+    #    for t in tables:
+    #        self.execute('CREATE TABLE ' + t + '_create(a INT)', 'create_1_' + t)
+    #        self.execute('SHOW TABLES \'' + t + '_create\'', 'create_2_' + t, 'hive')
 
     # def test_21_create_as(self):
     #    for t in tables + ['t_ctas']:
     #        self.execute('CREATE TABLE ' + t + '_create_as AS SELECT * FROM t_full', 'create_as_1_' + t)
     #        self.execute('SHOW TABLES \'' + t + '_create_as\'', 'create_as_2_' + t, 'hive')
 
-    def test_30_drop(self):
-        for t in tables:
-            self.execute('DROP TABLE ' + t, 'drop_1_' + t)
-            self.execute('SHOW TABLES \'' + t + '\'', 'drop_2_' + t, 'hive')
+    # def test_30_drop(self):
+    #    for t in tables:
+    #        self.execute('DROP TABLE ' + t, 'drop_1_' + t)
+    #        self.execute('SHOW TABLES \'' + t + '\'', 'drop_2_' + t, 'hive')
 
     # def test_40_alter_rename(self):
     #    for t in tables:
@@ -255,15 +255,15 @@ class TableTestSuite(SparkRangerTestSuite):
 
     def test_50_select(self):
         for t in tables:
-            self.execute('SELECT * FROM ' + t, 'select_1_' + t)
-            self.execute('SELECT a FROM ' + t, 'select_2_' + t)
-            self.execute('SELECT b FROM ' + t, 'select_3_' + t)
+            self.execute('SELECT * FROM ' + testdb + "." + t, 'select_1_' + t)
+            self.execute('SELECT a FROM ' + testdb + "." + t, 'select_2_' + t)
+            self.execute('SELECT b FROM ' + testdb + "." + t, 'select_3_' + t)
 
     def test_60_select_count(self):
         for t in tables:
-            self.execute('SELECT count(*) FROM ' + t, 'select_count_1_' + t)
-            self.execute('SELECT count(a) FROM ' + t, 'select_count_2_' + t)
-            self.execute('SELECT count(b) FROM ' + t, 'select_count_3_' + t)
+            self.execute('SELECT count(*) FROM ' + testdb + "." + t, 'select_count_1_' + t)
+            self.execute('SELECT count(a) FROM ' + testdb + "." + t, 'select_count_2_' + t)
+            self.execute('SELECT count(b) FROM ' + testdb + "." + t, 'select_count_3_' + t)
 
    # def test_70_insert(self):
    #     for t in tables:
@@ -276,12 +276,12 @@ class TableTestSuite(SparkRangerTestSuite):
    #         self.execute('SELECT * FROM ' + t, 'truncate_2_' + t, 'hive')
 
     def test_90_mask(self):
-        self.execute('SELECT * FROM t_mask_and_filter', 'mask_1')
-        self.execute('SELECT * FROM t_mask_and_filter', 'mask_2', 'hive')
+        self.execute('SELECT * FROM ' + testdb + "." + 't_mask_and_filter', 'mask_1')
+        self.execute('SELECT * FROM ' + testdb + "." + 't_mask_and_filter', 'mask_2', 'hive')
 
     def test_A0_filter(self):
-        self.execute('SELECT * FROM t_mask_and_filter', 'filter_1')
-        self.execute('SELECT * FROM t_mask_and_filter', 'filter_2', 'hive')
+        self.execute('SELECT * FROM ' + testdb + "." + 't_mask_and_filter', 'filter_1')
+        self.execute('SELECT * FROM ' + testdb + "." + 't_mask_and_filter', 'filter_2', 'hive')
 
 
 

@@ -1,1 +1,1 @@
-17/06/27 00:46:26 [main]: WARN jdbc.HiveConnection: Failed to connect to ctr-e126-1485243696039-11019-01-000004.hwx.site:10016
+Error: java.io.IOException: shadehive.org.apache.hive.service.cli.HiveSQLException: java.io.IOException: org.apache.hadoop.hive.ql.metadata.HiveException: Failed to compile query: org.apache.hadoop.hive.ql.security.authorization.plugin.HiveAccessControlException: Permission denied: user [spark] does not have [SELECT] privilege on [spark_ranger_test/t_update/*] (state=,code=0)

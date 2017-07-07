@@ -1,0 +1,14 @@
++--------------------+--------------+--+
+|     tableName      | isTemporary  |
++--------------------+--------------+--+
+| t_full             | false        |
+| t_partial          | false        |
+| t_select           | false        |
+| t_update           | false        |
+| t_create           | false        |
+| t_drop             | false        |
+| t_alter            | false        |
+| t_index            | false        |
+| t_lock             | false        |
+| t_mask_and_filter  | false        |
++--------------------+--------------+--+
