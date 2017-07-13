@@ -28,8 +28,8 @@ class DefaultSource extends RelationProvider {
   override def createRelation(sqlContext: SQLContext, parameters: Map[String, String])
       : BaseRelation = {
     val connectionUrl =
-      sqlContext.sparkSession.sessionState.getConnectionUrl(sqlContext.sparkSession)
-    val user = sqlContext.sparkSession.sessionState.getUserString()
+      sqlContext.sparkSession.sessionState.conf.getConfString("spark.sql.hive.llap.url")
+    val user = sqlContext.sparkSession.sessionState.conf.getConfString("spark.sql.hive.llap.user")
     val params = parameters +
       ("user.name" -> user) +
       ("user.password" -> "password") +

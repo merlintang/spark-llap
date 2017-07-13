@@ -17,10 +17,12 @@
 
 package org.apache.spark.sql.hive.llap
 
-import com.hortonworks.spark.sql.hive.llap.DefaultJDBCWrapper
 import java.sql.Connection
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
+
+import com.hortonworks.spark.sql.hive.llap.DefaultJDBCWrapper
 import org.apache.hadoop.conf.Configuration
 
 import org.apache.spark.internal.Logging
@@ -71,10 +73,9 @@ private[spark] class LlapExternalCatalog(
    * @return the connection to the HIVE LLAP
    */
   private def createConnection(): Connection = {
-    val sparkSession = SparkSession.getActiveSession.get.sqlContext.sparkSession
     val sessionState = SparkSession.getActiveSession.get.sessionState
-    val connectionUrl = sessionState.getConnectionUrl(sparkSession)
-    val user = sessionState.getUserString()
+    val connectionUrl = sessionState.conf.getConfString("spark.sql.hive.llap.url")
+    val user = sessionState.conf.getConfString("spark.sql.hive.llap.user")
     val connection = DefaultJDBCWrapper.getConnector(None, connectionUrl, user)
     connection
   }

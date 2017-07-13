@@ -61,10 +61,9 @@ private[sql] class LlapSessionCatalog(
     if (Thread.currentThread().getStackTrace()(2).toString().contains("DescribeTableCommand")) {
       val db = formatDatabaseName(name.database.getOrElse(getCurrentDatabase))
       val table = formatTableName(name.table)
-      val sparkSession = SparkSession.getActiveSession.get.sqlContext.sparkSession
       val sessionState = SparkSession.getActiveSession.get.sessionState
-      val connectionUrl = sessionState.getConnectionUrl(sparkSession)
-      val user = sessionState.getUserString()
+      val connectionUrl = sessionState.conf.getConfString("spark.sql.hive.llap.url")
+      val user = sessionState.conf.getConfString("spark.sql.hive.llap.user")
       val connection = DefaultJDBCWrapper.getConnector(None, connectionUrl, user)
       val stmt = connection.createStatement()
       stmt.executeUpdate(s"DESC `$db`.`$table`")
