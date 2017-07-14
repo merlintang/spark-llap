@@ -17,6 +17,8 @@
 
 package org.apache.spark.sql.hive.llap
 
+import scala.reflect.runtime.{universe => ru}
+
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.hive.{HiveMetastoreCatalog, HiveSessionStateBuilder}
@@ -61,6 +63,41 @@ class LlapSessionStateBuilder(sparkSession: SparkSession, parentState: Option[Se
   }
 
   // ------------------------------------------------------
+  //  Helper methods for HDP Ranger with LLAP
+  // ------------------------------------------------------
+  /**
+   * @return User name for the STS connection
+   */
+  def getUserString(): String = {
+    // System.getProperty("user")
+    LlapSessionStateBuilder.getUserMethod match {
+      case null =>
+        null
+      case _ =>
+        val instanceMirror = ru.runtimeMirror(this.getClass.getClassLoader).reflect(this)
+        val methodMirror = instanceMirror.reflectMethod(LlapSessionStateBuilder.getUserMethod)
+        methodMirror().asInstanceOf[String]
+    }
+  }
+
+  /**
+   * Return connection URL (with replaced proxy user name if exists).
+   */
+  def getConnectionUrl(sparkSession: SparkSession): String = {
+    var userString = getUserString()
+    if (userString == null) {
+      userString = ""
+    }
+    val urlString = LlapSessionStateBuilder.getConnectionUrlFromConf(sparkSession)
+    urlString.replace("${user}", userString)
+  }
+
+}
+
+private [llap] object LlapSessionStateBuilder
+{
+
+  // ------------------------------------------------------
   //  Configuration for HDP Ranger with LLAP
   // ------------------------------------------------------
   val HIVESERVER2_JDBC_URL =
@@ -80,28 +117,6 @@ class LlapSessionStateBuilder(sparkSession: SparkSession, parentState: Option[Se
       .doc("When true, HiveServer2 credential provider is enabled.")
       .booleanConf
       .createWithDefault(false)
-
-  // ------------------------------------------------------
-  //  Helper methods for HDP Ranger with LLAP
-  // ------------------------------------------------------
-  /**
-   * @return User name for the STS connection
-   */
-  def getUserString(): String = {
-    System.getProperty("user")
-  }
-
-  /**
-   * Return connection URL (with replaced proxy user name if exists).
-   */
-  def getConnectionUrl(sparkSession: SparkSession): String = {
-    var userString = getUserString()
-    if (userString == null) {
-      userString = ""
-    }
-    val urlString = getConnectionUrlFromConf(sparkSession)
-    urlString.replace("${user}", userString)
-  }
 
   /**
    * For the given HiveServer2 JDBC URLs, attach the postfix strings if needed.
@@ -130,6 +145,18 @@ class LlapSessionStateBuilder(sparkSession: SparkSession, parentState: Option[Se
       // 3. For non-kerberized cluster
       sparkSession.conf.get(HIVESERVER2_JDBC_URL.key)
     }
+  }
+
+  private[llap] lazy val getUserMethod = findGetUserMethod()
+
+  private def findGetUserMethod(): ru.MethodSymbol = {
+    val symbol = ru.typeOf[HiveSessionStateBuilder].declaration(ru.stringToTermName("getUser"))
+    val methodSymbol = symbol match {
+      case ru.NoSymbol => null
+      case null => null
+      case _ => symbol.asMethod
+    }
+    methodSymbol
   }
 
 }
