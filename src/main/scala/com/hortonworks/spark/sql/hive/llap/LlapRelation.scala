@@ -26,12 +26,12 @@ import org.apache.hadoop.hive.llap.{LlapInputSplit, LlapRowInputFormat, Schema}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.{InputSplit, JobConf}
 import org.apache.hive.service.cli.HiveSQLException
+
 import org.apache.spark.rdd.HadoopRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.sql.sources.{BaseRelation, Filter, InsertableRelation, PrunedFilteredScan}
 import org.apache.spark.sql.types.StructType
-import org.slf4j.LoggerFactory
 
 
 case class LlapRelation(
@@ -175,18 +175,8 @@ case class LlapRelation(
             throw new IllegalStateException("Failed to read count star value")
           }
         } catch {
-            case e: Throwable =>
-              val log = LoggerFactory.getLogger(getClass)
-              log.info("\n" + "error messages of throwable " + e.toString + "\n")
-              val y = e.toString.replace(
-                "shadehive.org.apache.hive.service.cli.HiveSQLException: ", "")
-              log.info("\n" + "error messages of throwable after filtering " + y + "\n")
-              throw new SQLException(y)
-            case e: HiveSQLException =>
-              val log = LoggerFactory.getLogger(getClass)
-              log.info("\n" + "error messages of Hive Error messages are " + e.toString + "\n")
-              throw new HiveSQLException(
-                e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException:", ""))
+            case e: Throwable => throw new SQLException(e)
+            case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }
     }
