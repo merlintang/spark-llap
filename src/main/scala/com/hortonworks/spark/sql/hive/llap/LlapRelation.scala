@@ -25,7 +25,7 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hive.llap.{LlapInputSplit, LlapRowInputFormat, Schema}
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.{InputSplit, JobConf}
-
+import org.apache.hive.service.cli.HiveSQLException
 import org.apache.spark.rdd.HadoopRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
@@ -165,13 +165,19 @@ case class LlapRelation(
   private def handleCountStar(queryString: String): RDD[Row] = {
     tryWithResource(getConnection()) { conn =>
       tryWithResource(conn.createStatement()) { stmt =>
-        val rs = stmt.executeQuery(queryString)
-        if (rs.next()) {
-          val countStarValue = rs.getLong(1)
-          sqlContext.sparkContext.parallelize(1L to countStarValue).map(_ => Row.empty)
-        } else {
-          throw new IllegalStateException("Failed to read count star value")
-        }
+        try {
+          val rs = stmt.executeQuery(queryString)
+          if (rs.next()) {
+            val countStarValue = rs.getLong(1)
+            sqlContext.sparkContext.parallelize(1L to countStarValue).map(_ => Row.empty)
+          } else {
+            throw new IllegalStateException("Failed to read count star value")
+          }
+        } catch {
+            case e: Throwable =>
+              throw new HiveSQLException(
+                e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException:", ""))
+          }
       }
     }
   }
