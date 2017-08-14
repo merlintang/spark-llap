@@ -179,11 +179,12 @@ case class LlapRelation(
               val log = LoggerFactory.getLogger(getClass)
               log.info("\n" + "error messages of throwable " + e.toString + "\n")
               throw new HiveSQLException(
-                e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException:", ""))
+                e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
             case e: HiveSQLException =>
               val log = LoggerFactory.getLogger(getClass)
               log.info("\n" + "error messages of Hive Error messages are " + e.toString + "\n")
-              throw new HiveSQLException(e.toString)
+              throw new HiveSQLException(
+                e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException:", ""))
         }
       }
     }
