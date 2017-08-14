@@ -31,6 +31,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.sql.sources.{BaseRelation, Filter, InsertableRelation, PrunedFilteredScan}
 import org.apache.spark.sql.types.StructType
+import org.slf4j.LoggerFactory
 
 
 case class LlapRelation(
@@ -175,9 +176,15 @@ case class LlapRelation(
           }
         } catch {
             case e: Throwable =>
+              val log = LoggerFactory.getLogger(getClass)
+              log.info("\n" + "error messages of throwable " + e.toString + "\n")
               throw new HiveSQLException(
                 e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException:", ""))
-          }
+            case e: HiveSQLException =>
+              val log = LoggerFactory.getLogger(getClass)
+              log.info("\n" + "error messages of Hive Error messages are " + e.toString + "\n")
+              throw new HiveSQLException(e.toString)
+        }
       }
     }
   }
