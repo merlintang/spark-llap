@@ -23,6 +23,7 @@ import java.util.UUID
 
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hive.llap.{LlapInputSplit, LlapRowInputFormat, Schema}
+import org.apache.hadoop.hive.ql.security.authorization.plugin.HiveAccessControlException
 import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapred.{InputSplit, JobConf}
 import org.apache.hive.service.cli.HiveSQLException
@@ -181,7 +182,7 @@ case class LlapRelation(
               val y = e.toString.replace(
                 "shadehive.org.apache.hive.service.cli.HiveSQLException: ", "")
               log.info("\n" + "error messages of throwable after filtering " + y + "\n")
-              throw new Exception(y)
+              throw new HiveAccessControlException(y)
             case e: HiveSQLException =>
               val log = LoggerFactory.getLogger(getClass)
               log.info("\n" + "error messages of Hive Error messages are " + e.toString + "\n")
