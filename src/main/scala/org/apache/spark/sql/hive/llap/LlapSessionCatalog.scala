@@ -111,7 +111,8 @@ private[sql] class LlapSessionCatalog(
       try {
         stmt.executeUpdate(s"DESC `$db`.`$table`")
       } catch {
-        case e: Throwable => throw new SQLException(e)
+        case e: Throwable => throw new SQLException(
+          e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
         case e: HiveSQLException => throw new HiveSQLException(e)
       }
     }

@@ -175,7 +175,8 @@ case class LlapRelation(
             throw new IllegalStateException("Failed to read count star value")
           }
         } catch {
-            case e: Throwable => throw new SQLException(e)
+            case e: Throwable => throw new SQLException(
+              e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
             case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }

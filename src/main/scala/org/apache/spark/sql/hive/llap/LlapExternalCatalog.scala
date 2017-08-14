@@ -117,7 +117,8 @@ private[spark] class LlapExternalCatalog(
         try {
           stmt.executeUpdate(s"CREATE DATABASE $ifNotExistsString `${dbDefinition.name}`")
         } catch {
-          case e: Throwable => throw new SQLException(e)
+          case e: Throwable => throw new SQLException(
+            e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
           case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }
@@ -136,7 +137,8 @@ private[spark] class LlapExternalCatalog(
         try {
           stmt.executeUpdate(s"DROP DATABASE $ifExistsString `$db` $cascadeString")
         } catch {
-          case e: Throwable => throw new SQLException(e)
+          case e: Throwable => throw new SQLException(
+            e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
           case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }
@@ -154,7 +156,8 @@ private[spark] class LlapExternalCatalog(
               isExist = rs.next()
             }
           } catch {
-            case e: Throwable => throw new SQLException(e)
+            case e: Throwable => throw new SQLException(
+              e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
             case e: HiveSQLException => throw new HiveSQLException(e)
           }
         }
@@ -187,7 +190,8 @@ private[spark] class LlapExternalCatalog(
             }
           }
         } catch {
-          case e: Throwable => throw new SQLException(e)
+          case e: Throwable => throw new SQLException(
+            e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
           case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }
@@ -241,7 +245,8 @@ private[spark] class LlapExternalCatalog(
             val purgeString = if (purge) "PURGE" else ""
             stmt.executeUpdate(s"DROP TABLE $ifExistsString $db.$table $purgeString")
           } catch {
-            case e: Throwable => throw new SQLException(e)
+            case e: Throwable => throw new SQLException(
+              e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
             case e: HiveSQLException => throw new HiveSQLException(e)
           }
         }
@@ -313,7 +318,8 @@ private[spark] class LlapExternalCatalog(
           }
         }
       } catch {
-        case e: Throwable => throw new SQLException(e)
+        case e: Throwable => throw new SQLException(
+          e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
         case e: HiveSQLException => throw new HiveSQLException(e)
         }
     }
@@ -428,7 +434,8 @@ private[spark] class LlapExternalCatalog(
         try {
           stmt.executeUpdate(sql)
         } catch {
-          case e: Throwable => throw new SQLException(e)
+          case e: Throwable => throw new SQLException(
+            e.toString.replace("shadehive.org.apache.hive.service.cli.HiveSQLException: ", ""))
           case e: HiveSQLException => throw new HiveSQLException(e)
         }
       }
