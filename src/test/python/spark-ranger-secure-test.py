@@ -8,7 +8,7 @@ import filecmp
 import tempfile
 
 testdb = "spark_ranger_test"
-hiveJdbcUrl = 'jdbc:hive2://hdp26-3.openstacklocal:10500/default;principal=hive/_HOST@EXAMPLE.COM'
+hiveJdbcUrl = 'jdbc:hive2://ctr-e134-1499953498516-213924-01-000003.hwx.site:10500/default;principal=hive/_HOST@EXAMPLE.COM'
 generateGoldenFiles = False
 answerPath = "../resources/answer"
 dirPath = tempfile.mkdtemp()
@@ -107,7 +107,7 @@ class SparkRangerTestSuite(unittest.TestCase):
 
 
 class DbTestSuite(SparkRangerTestSuite):
-    sparkJdbcUrl = 'jdbc:hive2://hdp26-6.openstacklocal:10016/;principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
+    sparkJdbcUrl = 'jdbc:hive2://ctr-e134-1499953498516-213924-01-000003.hwx.site:10017/;principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
 
     def setUp(self):
         sqls = map(lambda db: 'DROP DATABASE IF EXISTS ' + db + ' CASCADE', dbs + [testdb])
@@ -140,7 +140,7 @@ class DbTestSuite(SparkRangerTestSuite):
 
 
 class TableTestSuite(SparkRangerTestSuite):
-    sparkJdbcUrl = 'jdbc:hive2://hdp26-6.openstacklocal:10016/' + testdb + ';principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
+    sparkJdbcUrl = 'jdbc:hive2://ctr-e134-1499953498516-213924-01-000003.hwx.site:10017/' + testdb + ';principal=hive/_HOST@EXAMPLE.COM;hive.server2.proxy.user='
 
     def setUp(self):
         sqls = [
